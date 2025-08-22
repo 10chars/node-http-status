@@ -1,0 +1,69 @@
+{
+  "name": "node-http-status",
+  "version": "0.0.0",
+  "description": "Simple and intuitive HTTP response status codes",
+  "author": "luke.helg@gmail.com",
+  "keywords": [
+    "http",
+    "status",
+    "response",
+    "codes",
+    "simple"
+  ],
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./locale/en": {
+      "types": "./dist/locales/en.d.ts",
+      "import": "./dist/locales/en.mjs",
+      "require": "./dist/locales/en.js"
+    },
+    "./locale/ja": {
+      "types": "./dist/locales/ja.d.ts",
+      "import": "./dist/locales/ja.mjs",
+      "require": "./dist/locales/ja.js"
+    },
+    "./locale/es": {
+      "types": "./dist/locales/es.d.ts",
+      "import": "./dist/locales/es.mjs",
+      "require": "./dist/locales/es.js"
+    },
+    "./locale/de": {
+      "types": "./dist/locales/de.d.ts",
+      "import": "./dist/locales/de.mjs",
+      "require": "./dist/locales/de.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint . --fix",
+    "test": "npm run build && node --test test/index.test.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.40.0"
+  },
+  "engines": {
+    "node": ">= 18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module"
+}

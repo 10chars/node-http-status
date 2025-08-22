@@ -1,0 +1,24 @@
+<!-- simple-http-response – 64x64 icon-only -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="simple-http-response icon">
+  <defs>
+    <style>
+      :root{ --brand:#F1423D; --brand-soft:#FFE4E4; }
+    </style>
+  </defs>
+
+  <!-- Body: abstract reply/speech-bubble with pointed base -->
+  <path d="M28 6
+           C17 6 10 13 10 24
+           v12c0 9 7 16 18 16
+           h5l6 6c1 .9 3 .4 3-1v-5
+           c9-2 12-9 12-16V24
+           C54 13 47 6 36 6Z" fill="var(--brand)"></path>
+
+  <!-- Eye -->
+  <circle cx="24" cy="24" r="2.6" fill="var(--brand-soft)"></circle>
+
+  <!-- Leaf / uplift -->
+  <path d="M44 8
+           c7 0 12 5 12 12
+           c-7 0 -12-5 -12-12Z" fill="var(--brand)"></path>
+</svg>

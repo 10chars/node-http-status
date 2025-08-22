@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" role="img" aria-labelledby="title desc">
+  <title id="title">node-http-status Logo</title>
+  <desc id="desc">Minimal logo with text and subtle status checkmark icon.</desc>
+  
+  <style>
+    .name { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 48px; font-weight: 700; fill: #111; }
+    .sub  { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 22px; font-weight: 400; fill: #444; }
+    .icon { stroke: #CB3837; stroke-width: 10; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  
+  <!-- Simple status/check icon -->
+  <g transform="translate(30,60)">
+    <rect x="0" y="0" width="80" height="80" rx="12" ry="12" stroke="#111" stroke-width="10" fill="none"></rect>
+    <path d="M20 45 L35 60 L60 30" class="icon"></path>
+  </g>
+
+  <!-- Text -->
+  <g transform="translate(140,95)">
+    <text class="name">node-http-status</text>
+    <text class="sub" y="40">HTTP status codes for Node.js</text>
+  </g>
+</svg>
