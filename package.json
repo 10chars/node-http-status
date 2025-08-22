@@ -11,6 +11,14 @@
     "simple"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/10chars/node-http-status"
+  },
+  "bugs": {
+    "url": "https://github.com/10chars/node-http-status/issues"
+  },
+  "homepage": "https://github.com/10chars/node-http-status#readme",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
