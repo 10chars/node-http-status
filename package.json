@@ -26,27 +26,27 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "require": "./dist/index.cjs"
     },
     "./locale/en": {
       "types": "./dist/locales/en.d.ts",
       "import": "./dist/locales/en.mjs",
-      "require": "./dist/locales/en.js"
+      "require": "./dist/locales/en.cjs"
     },
     "./locale/ja": {
       "types": "./dist/locales/ja.d.ts",
       "import": "./dist/locales/ja.mjs",
-      "require": "./dist/locales/ja.js"
+      "require": "./dist/locales/ja.cjs"
     },
     "./locale/es": {
       "types": "./dist/locales/es.d.ts",
       "import": "./dist/locales/es.mjs",
-      "require": "./dist/locales/es.js"
+      "require": "./dist/locales/es.cjs"
     },
     "./locale/de": {
       "types": "./dist/locales/de.d.ts",
       "import": "./dist/locales/de.mjs",
-      "require": "./dist/locales/de.js"
+      "require": "./dist/locales/de.cjs"
     }
   },
   "files": [
