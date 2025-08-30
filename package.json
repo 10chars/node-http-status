@@ -24,29 +24,54 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./locale/en": {
-      "types": "./dist/locales/en.d.ts",
-      "import": "./dist/locales/en.js",
-      "require": "./dist/locales/en.cjs"
+      "import": {
+        "types": "./dist/locales/en.d.ts",
+        "default": "./dist/locales/en.js"
+      },
+      "require": {
+        "types": "./dist/locales/en.d.cts",
+        "default": "./dist/locales/en.cjs"
+      }
     },
     "./locale/ja": {
-      "types": "./dist/locales/ja.d.ts",
-      "import": "./dist/locales/ja.js",
-      "require": "./dist/locales/ja.cjs"
+      "import": {
+        "types": "./dist/locales/ja.d.ts",
+        "default": "./dist/locales/ja.js"
+      },
+      "require": {
+        "types": "./dist/locales/ja.d.cts",
+        "default": "./dist/locales/ja.cjs"
+      }
     },
     "./locale/es": {
-      "types": "./dist/locales/es.d.ts",
-      "import": "./dist/locales/es.js",
-      "require": "./dist/locales/es.cjs"
+      "import": {
+        "types": "./dist/locales/es.d.ts",
+        "default": "./dist/locales/es.js"
+      },
+      "require": {
+        "types": "./dist/locales/es.d.cts",
+        "default": "./dist/locales/es.cjs"
+      }
     },
     "./locale/de": {
-      "types": "./dist/locales/de.d.ts",
-      "import": "./dist/locales/de.js",
-      "require": "./dist/locales/de.cjs"
+      "import": {
+        "types": "./dist/locales/de.d.ts",
+        "default": "./dist/locales/de.js"
+      },
+      "require": {
+        "types": "./dist/locales/de.d.cts",
+        "default": "./dist/locales/de.cjs"
+      }
     }
   },
   "files": [
@@ -55,7 +80,8 @@
   "scripts": {
     "build": "tsup",
     "lint": "eslint . --fix",
-    "test": "npm run build && node --test test/index.test.js"
+    "test": "npm run build && node --test test/index.test.js",
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
