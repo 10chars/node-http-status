@@ -493,3 +493,323 @@ describe('HTTP Response Library', () => {
     });
   });
 });
+
+// Custom Formatters
+describe('Custom Formatters', () => {
+  it('should create custom formatted objects', async () => {
+    const { createCustomHttpStatus } = await import('../dist/index.js');
+
+    // Create custom format like the user's example
+    const customHttp = createCustomHttpStatus((status, code, message) => ({
+      response: {
+        error: code,
+        message: message,
+      },
+      statusCode: status,
+    }));
+
+    // Test basic structure
+    const internalError = customHttp.internalServerError;
+    assert.strictEqual(typeof internalError, 'object');
+    assert.strictEqual(typeof internalError.response, 'object');
+    assert.strictEqual(internalError.response.error, 'INTERNAL_SERVER_ERROR');
+    assert.strictEqual(internalError.statusCode, 500);
+    assert.strictEqual(typeof internalError.response.message, 'string');
+    assert.ok(internalError.response.message.length > 0);
+  });
+
+  it('should maintain alias equality in custom formatters', async () => {
+    const { createCustomHttpStatus } = await import('../dist/index.js');
+
+    const customHttp = createCustomHttpStatus((status, code, message) => ({
+      status,
+      code,
+      message,
+      custom: true,
+    }));
+
+    // All aliases should be the same object
+    assert.strictEqual(customHttp.ok, customHttp.OK);
+    assert.strictEqual(customHttp.OK, customHttp[200]);
+    assert.strictEqual(customHttp.ok, customHttp[200]);
+
+    // Check custom property exists
+    assert.strictEqual(customHttp.ok.custom, true);
+    assert.strictEqual(customHttp.ok.status, 200);
+  });
+
+  it('should work with different custom formats', async () => {
+    const { createCustomHttpStatus } = await import('../dist/index.js');
+
+    // Express-style format
+    const expressFormat = createCustomHttpStatus((status, code, message) => ({
+      status,
+      error: {
+        code: code,
+        detail: message,
+      },
+    }));
+
+    // Test format
+    const notFound = expressFormat.notFound;
+    assert.strictEqual(notFound.status, 404);
+    assert.strictEqual(notFound.error.code, 'NOT_FOUND');
+    assert.strictEqual(typeof notFound.error.detail, 'string');
+
+    // Another format - minimal
+    const minimalFormat = createCustomHttpStatus((status, code) => ({
+      s: status,
+      c: code,
+    }));
+
+    const teapot = minimalFormat.imATeapot;
+    assert.strictEqual(teapot.s, 418);
+    assert.strictEqual(teapot.c, 'IM_A_TEAPOT');
+  });
+
+  it('should have TypeScript-compatible return types', async () => {
+    const { createCustomHttpStatus } = await import('../dist/index.js');
+
+    // This would be type-checked at compile time
+    const typedFormat = createCustomHttpStatus((status, code, message) => ({
+      statusCode: status,
+      errorCode: code,
+      description: message,
+      timestamp: new Date().toISOString(),
+    }));
+
+    const response = typedFormat.badRequest;
+    assert.strictEqual(typeof response.statusCode, 'number');
+    assert.strictEqual(typeof response.errorCode, 'string');
+    assert.strictEqual(typeof response.description, 'string');
+    assert.strictEqual(typeof response.timestamp, 'string');
+  });
+
+  it('should work with REST API format', async () => {
+    const { createCustomHttpStatus } = await import('../dist/index.js');
+
+    const apiFormat = createCustomHttpStatus((status, code, message) => ({
+      success: status < 400,
+      statusCode: status,
+      error:
+        status >= 400
+          ? {
+              type: code,
+              message: message,
+            }
+          : null,
+      data: null,
+    }));
+
+    // Test success response
+    const successResponse = apiFormat.ok;
+    assert.strictEqual(successResponse.success, true);
+    assert.strictEqual(successResponse.statusCode, 200);
+    assert.strictEqual(successResponse.error, null);
+    assert.strictEqual(successResponse.data, null);
+
+    // Test error response
+    const errorResponse = apiFormat.badRequest;
+    assert.strictEqual(errorResponse.success, false);
+    assert.strictEqual(errorResponse.statusCode, 400);
+    assert.strictEqual(typeof errorResponse.error, 'object');
+    assert.strictEqual(errorResponse.error.type, 'BAD_REQUEST');
+    assert.strictEqual(typeof errorResponse.error.message, 'string');
+  });
+
+  it('should work with all new status codes', async () => {
+    const { createCustomHttpStatus } = await import('../dist/index.js');
+
+    const customHttp = createCustomHttpStatus((status, code, message) => ({
+      httpStatus: status,
+      errorType: code,
+      description: message,
+    }));
+
+    // Test some of the newly added status codes
+    const partialContent = customHttp.partialContent;
+    assert.strictEqual(partialContent.httpStatus, 206);
+    assert.strictEqual(partialContent.errorType, 'PARTIAL_CONTENT');
+
+    const teapot = customHttp.imATeapot;
+    assert.strictEqual(teapot.httpStatus, 418);
+    assert.strictEqual(teapot.errorType, 'IM_A_TEAPOT');
+    assert.ok(teapot.description.includes('teapot'));
+
+    const legalReasons = customHttp.unavailableForLegalReasons;
+    assert.strictEqual(legalReasons.httpStatus, 451);
+    assert.strictEqual(legalReasons.errorType, 'UNAVAILABLE_FOR_LEGAL_REASONS');
+
+    const httpVersionNotSupported = customHttp.httpVersionNotSupported;
+    assert.strictEqual(httpVersionNotSupported.httpStatus, 505);
+    assert.strictEqual(
+      httpVersionNotSupported.errorType,
+      'HTTP_VERSION_NOT_SUPPORTED',
+    );
+  });
+
+  it('should support enriched formats with metadata', async () => {
+    const { createCustomHttpStatus } = await import('../dist/index.js');
+
+    const enrichedFormat = createCustomHttpStatus((status, code, message) => ({
+      statusCode: status,
+      errorCode: code,
+      description: message,
+      severity: status >= 500 ? 'error' : status >= 400 ? 'warning' : 'info',
+      category:
+        status < 300
+          ? 'success'
+          : status < 400
+            ? 'redirect'
+            : status < 500
+              ? 'client'
+              : 'server',
+    }));
+
+    // Test success
+    const success = enrichedFormat.created;
+    assert.strictEqual(success.severity, 'info');
+    assert.strictEqual(success.category, 'success');
+
+    // Test redirect
+    const redirect = enrichedFormat.moved;
+    assert.strictEqual(redirect.severity, 'info');
+    assert.strictEqual(redirect.category, 'redirect');
+
+    // Test client error
+    const clientError = enrichedFormat.forbidden;
+    assert.strictEqual(clientError.severity, 'warning');
+    assert.strictEqual(clientError.category, 'client');
+
+    // Test server error
+    const serverError = enrichedFormat.internalServerError;
+    assert.strictEqual(serverError.severity, 'error');
+    assert.strictEqual(serverError.category, 'server');
+  });
+
+  it('should work in practical Express.js scenario', async () => {
+    const { createCustomHttpStatus } = await import('../dist/index.js');
+
+    const expressFormat = createCustomHttpStatus((status, code, message) => ({
+      status,
+      error: {
+        code: code,
+        detail: message,
+      },
+    }));
+
+    // Simulate Express error handler
+    const mockRes = {
+      statusCode: null,
+      responseData: null,
+      status: function (code) {
+        this.statusCode = code;
+        return this;
+      },
+      json: function (data) {
+        this.responseData = data;
+        return this;
+      },
+    };
+
+    // Use the format in "Express handler"
+    const errorResponse = expressFormat.internalServerError;
+    mockRes.status(errorResponse.status).json(errorResponse.error);
+
+    assert.strictEqual(mockRes.statusCode, 500);
+    assert.strictEqual(mockRes.responseData.code, 'INTERNAL_SERVER_ERROR');
+    assert.strictEqual(typeof mockRes.responseData.detail, 'string');
+  });
+});
+
+// Custom Formatters
+describe('Custom Formatters', () => {
+  it('should create custom formatted objects', async () => {
+    const { createCustomHttpStatus } = await import('../dist/index.js');
+
+    // Create custom format like the user's example
+    const customHttp = createCustomHttpStatus((status, code, message) => ({
+      response: {
+        error: code,
+        message: message,
+      },
+      statusCode: status,
+    }));
+
+    // Test basic structure
+    const internalError = customHttp.internalServerError;
+    assert.strictEqual(typeof internalError, 'object');
+    assert.strictEqual(typeof internalError.response, 'object');
+    assert.strictEqual(internalError.response.error, 'INTERNAL_SERVER_ERROR');
+    assert.strictEqual(internalError.statusCode, 500);
+    assert.strictEqual(typeof internalError.response.message, 'string');
+    assert.ok(internalError.response.message.length > 0);
+  });
+
+  it('should maintain alias equality in custom formatters', async () => {
+    const { createCustomHttpStatus } = await import('../dist/index.js');
+
+    const customHttp = createCustomHttpStatus((status, code, message) => ({
+      status,
+      code,
+      message,
+      custom: true,
+    }));
+
+    // All aliases should be the same object
+    assert.strictEqual(customHttp.ok, customHttp.OK);
+    assert.strictEqual(customHttp.OK, customHttp[200]);
+    assert.strictEqual(customHttp.ok, customHttp[200]);
+
+    // Check custom property exists
+    assert.strictEqual(customHttp.ok.custom, true);
+    assert.strictEqual(customHttp.ok.status, 200);
+  });
+
+  it('should work with different custom formats', async () => {
+    const { createCustomHttpStatus } = await import('../dist/index.js');
+
+    // Express-style format
+    const expressFormat = createCustomHttpStatus((status, code, message) => ({
+      status,
+      error: {
+        code: code,
+        detail: message,
+      },
+    }));
+
+    // Test format
+    const notFound = expressFormat.notFound;
+    assert.strictEqual(notFound.status, 404);
+    assert.strictEqual(notFound.error.code, 'NOT_FOUND');
+    assert.strictEqual(typeof notFound.error.detail, 'string');
+
+    // Another format - minimal
+    const minimalFormat = createCustomHttpStatus((status, code) => ({
+      s: status,
+      c: code,
+    }));
+
+    const teapot = minimalFormat.imATeapot;
+    assert.strictEqual(teapot.s, 418);
+    assert.strictEqual(teapot.c, 'IM_A_TEAPOT');
+  });
+
+  it('should have TypeScript-compatible return types', async () => {
+    const { createCustomHttpStatus } = await import('../dist/index.js');
+
+    // This would be type-checked at compile time
+    const typedFormat = createCustomHttpStatus((status, code, message) => ({
+      statusCode: status,
+      errorCode: code,
+      description: message,
+      timestamp: new Date().toISOString(),
+    }));
+
+    const response = typedFormat.badRequest;
+    assert.strictEqual(typeof response.statusCode, 'number');
+    assert.strictEqual(typeof response.errorCode, 'string');
+    assert.strictEqual(typeof response.description, 'string');
+    assert.strictEqual(typeof response.timestamp, 'string');
+  });
+});

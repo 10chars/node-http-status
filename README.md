@@ -15,6 +15,7 @@
 ✅ **Simple**: No complex APIs to learn - just import and use  
 ✅ **Lightweight**: Under 3KB minified, zero dependencies  
 ✅ **Flexible**: Multiple access patterns (camelCase, UPPERCASE, numeric)  
+✅ **Customizable**: Create your own response object format with `createCustomHttpStatus`  
 ✅ **Localized**: Built-in support for multiple languages (EN, JA, ES, DE)  
 ✅ **TypeScript-first**: Full type safety out of the box  
 ✅ **Framework-agnostic**: Works with Express, Fastify, Next.js, or any Node.js app
@@ -237,6 +238,118 @@ app.get('/api/data', (req, res) => {
   res.status(httpStatus.notFound.status).json(httpStatus.notFound)
   // Response: { status: 404, code: 'NOT_FOUND', message: 'No se pudo encontrar el recurso solicitado' }
 })
+```
+
+## Custom Formatters
+
+Need a different response object structure? Use `createCustomHttpStatus` to define your own format while keeping all the convenience of aliases and status codes.
+
+```javascript
+import { createCustomHttpStatus } from 'node-http-status'
+
+// Create a custom formatter function
+const customHttp = createCustomHttpStatus((status, code, message) => ({
+  response: {
+    error: code,
+    message: message
+  },
+  statusCode: status
+}))
+
+// Use it just like the regular httpStatus object
+console.log(customHttp.internalServerError)
+// { response: { error: 'INTERNAL_SERVER_ERROR', message: '...' }, statusCode: 500 }
+
+// All aliases work the same way
+console.log(customHttp.INTERNAL_SERVER_ERROR === customHttp.internalServerError)  // true
+console.log(customHttp[500] === customHttp.internalServerError)                    // true
+```
+
+### REST API Format Example
+
+```javascript
+import { createCustomHttpStatus } from 'node-http-status'
+
+const apiFormat = createCustomHttpStatus((status, code, message) => ({
+  success: status < 400,
+  statusCode: status,
+  error: status >= 400 ? {
+    type: code,
+    message: message
+  } : null,
+  data: null
+}))
+
+// Success response
+console.log(apiFormat.ok)
+// { success: true, statusCode: 200, error: null, data: null }
+
+// Error response  
+console.log(apiFormat.badRequest)
+// { success: false, statusCode: 400, error: { type: 'BAD_REQUEST', message: '...' }, data: null }
+```
+
+### Express.js with Custom Format
+
+```javascript
+import express from 'express'
+import { createCustomHttpStatus } from 'node-http-status'
+
+const app = express()
+
+// Create Express-friendly format
+const expressFormat = createCustomHttpStatus((status, code, message) => ({
+  status,
+  error: {
+    code: code,
+    detail: message
+  }
+}))
+
+app.get('/api/users/:id', (req, res) => {
+  const user = findUser(req.params.id)
+  if (!user) {
+    const notFoundResponse = expressFormat.notFound
+    return res.status(notFoundResponse.status).json(notFoundResponse.error)
+  }
+  
+  const okResponse = expressFormat.ok
+  res.status(okResponse.status).json({ 
+    ...okResponse.error, 
+    user 
+  })
+})
+```
+
+### TypeScript with Custom Formatters
+
+```typescript
+import { createCustomHttpStatus, type HttpStatusFormatter } from 'node-http-status'
+
+// Define your custom response type
+interface CustomResponse {
+  httpStatus: number
+  errorType: string
+  description: string
+  timestamp: string
+}
+
+// Create type-safe formatter
+const formatter: HttpStatusFormatter<CustomResponse> = (status, code, message) => ({
+  httpStatus: status,
+  errorType: code, 
+  description: message,
+  timestamp: new Date().toISOString()
+})
+
+const customHttp = createCustomHttpStatus(formatter)
+
+// Full type safety
+const response: CustomResponse = customHttp.forbidden
+// response.httpStatus is number
+// response.errorType is string  
+// response.description is string
+// response.timestamp is string
 ```
 
 ## API Reference
